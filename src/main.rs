@@ -1,5 +1,6 @@
 use yew::prelude::*;
 
+use gloo_net::http::Request;
 use serde::Deserialize;
 
 #[derive(Clone, PartialEq, Debug, Deserialize)]
@@ -55,34 +56,6 @@ fn video_details(VideosDetailsProps { video }: &VideosDetailsProps) -> Html {
 
 //
 
-const JSON_DATA: &str = r#"[
-    {
-        "id": 1,
-        "title": "Building and breaking things",
-        "speaker": "John Doe",
-        "url": "https://youtu.be/PsaFVLr8t4E"
-    },
-    {
-        "id": 2,
-        "title": "The development process",
-        "speaker": "Jane Smith",
-        "url": "https://youtu.be/PsaFVLr8t4E"
-    },
-    {
-        "id": 3,
-        "title": "The Web 7.0",
-        "speaker": "Matt Miller",
-        "url": "https://youtu.be/PsaFVLr8t4E"
-    },
-    {
-        "id": 4,
-        "title": "Mouseless development",
-        "speaker": "Tom Jerry",
-        "url": "https://youtu.be/PsaFVLr8t4E"
-    }
-]
-"#;
-
 #[function_component(App)]
 fn app() -> Html {
 
@@ -92,7 +65,12 @@ fn app() -> Html {
         use_effect_with((), move |_| {
             let videos = videos.clone();
             wasm_bindgen_futures::spawn_local(async move {
-                let fetched_videos: Vec<Video> = serde_json::from_str(JSON_DATA)
+                let fetched_videos: Vec<Video> = Request::get("https://yew.rs/tutorial/data.json")
+                    .send()
+                    .await
+                    .unwrap()
+                    .json()
+                    .await
                     .unwrap();
                 videos.set(fetched_videos);
             });
