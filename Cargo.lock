@@ -1160,6 +1160,9 @@ name = "yew-tuto"
 version = "0.1.0"
 dependencies = [
  "log",
+ "serde",
+ "serde_json",
+ "wasm-bindgen-futures",
  "wasm-logger",
  "yew",
 ]
