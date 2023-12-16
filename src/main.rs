@@ -65,10 +65,12 @@ fn app() -> Html {
         use_effect_with((), move |_| {
             let videos = videos.clone();
             wasm_bindgen_futures::spawn_local(async move {
-                let fetched_videos: Vec<Video> = Request::get("/tutorial/data.json")
+                let x = Request::get("/tutorial/data.json")
                     .send()
                     .await
-                    .unwrap()
+                    .unwrap();
+                log::info!("request: {:?}", &x.text().await);
+                let fetched_videos: Vec<Video> = x
                     .json()
                     .await
                     .unwrap();
