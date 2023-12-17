@@ -99,7 +99,7 @@ fn app() -> Html {
     let army = use_state(|| None);
     {
         let army = army.clone();
-        use_effect_with((), move |_| {
+        use_effect_with_deps(move |_| {
             let army = army.clone();
             wasm_bindgen_futures::spawn_local(async move {
                 let fetched_army: Army = serde_json::from_str(JSON_DATA)
@@ -107,7 +107,8 @@ fn app() -> Html {
                 army.set(Some(fetched_army));
             });
             || ()
-        });
+        },
+        ());
     }
 
     //
