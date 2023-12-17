@@ -1,9 +1,12 @@
 use yew::prelude::*;
 
-mod static_data;
-
-use crate::static_data::JSON_DATA;
+use gloo_net::http::Request;
 use serde::Deserialize;
+
+const GET_ARMY_BASE_URL: &str = "https://army-forge.onepagerules.com/api/tts";
+
+const ARMY_ID: &str = "ybjR2-7kHUNY";
+//const ARMY_ID: &str = "VV8Zy0GIfOUX";
 
 #[derive(Clone, PartialEq, Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -102,7 +105,14 @@ fn app() -> Html {
         use_effect_with_deps(move |_| {
             let army = army.clone();
             wasm_bindgen_futures::spawn_local(async move {
-                let fetched_army: Army = serde_json::from_str(JSON_DATA)
+                let fetched_army: Army = Request::get(format!("{base_url}?id={id}",
+                                                              base_url=GET_ARMY_BASE_URL,
+                                                              id=ARMY_ID).as_str())
+                    .send()
+                    .await
+                    .unwrap()
+                    .json()
+                    .await
                     .unwrap();
                 army.set(Some(fetched_army));
             });
