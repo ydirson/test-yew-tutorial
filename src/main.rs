@@ -6,12 +6,44 @@ use crate::static_data::JSON_DATA;
 use serde::Deserialize;
 
 #[derive(Clone, PartialEq, Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct Army {
+    id: String,
+    name: String,
+    game_system: String,
+    points: usize,
+    points_limit: usize,
+    units: Vec<Unit>,
+}
+
+#[derive(Clone, PartialEq, Debug, Deserialize)]
 struct Unit {
     id: String,
     name: String,
     size: usize,
     quality: usize,
     defense: usize,
+}
+
+//
+
+#[derive(Properties, PartialEq)]
+struct ArmyListProps {
+    army: Army,
+    on_click: Callback<Unit>,
+}
+
+#[function_component(ArmyList)]
+fn army_list(ArmyListProps { army, on_click }: &ArmyListProps) -> Html {
+    html! {
+        <>
+            <h2>{army.game_system.to_uppercase()}{" - "}{army.name.clone()}</h2>
+            <div>
+                <h3>{"Units"}</h3>
+                <UnitsList units={army.units.clone()} on_click={on_click.clone()} />
+            </div>
+        </>
+    }
 }
 
 //
@@ -64,15 +96,15 @@ fn unit_details(UnitsDetailsProps { unit }: &UnitsDetailsProps) -> Html {
 #[function_component(App)]
 fn app() -> Html {
 
-    let units = use_state(|| vec![]);
+    let army = use_state(|| None);
     {
-        let units = units.clone();
+        let army = army.clone();
         use_effect_with((), move |_| {
-            let units = units.clone();
+            let army = army.clone();
             wasm_bindgen_futures::spawn_local(async move {
-                let fetched_units: Vec<Unit> = serde_json::from_str(JSON_DATA)
+                let fetched_army: Army = serde_json::from_str(JSON_DATA)
                     .unwrap();
-                units.set(fetched_units);
+                army.set(Some(fetched_army));
             });
             || ()
         });
@@ -96,14 +128,12 @@ fn app() -> Html {
     //
 
     html! {
-        <>
-            <h1>{ "Army list" }</h1>
-            <div>
-                <h3>{"Units"}</h3>
-                <UnitsList units={(*units).clone()} on_click={on_unit_select.clone()} />
-            </div>
-            { for details }
-        </>
+        if !army.is_none() {
+            <>
+                <ArmyList army={(*army).clone().unwrap()} on_click={on_unit_select.clone()} />
+                { for details }
+            </>
+        }
     }
 }
 
