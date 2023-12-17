@@ -36,8 +36,7 @@ fn units_list(UnitsListProps { units, on_click }: &UnitsListProps) -> Html {
 
         html! {
             <p key={unit.id.clone()} onclick={on_unit_select}>{
-                format!("{name} [{size}]: Q{q} D{d}", name=unit.name,
-                        size=unit.size, q=unit.quality, d=unit.defense)
+                format!("{name} [{size}]", name=unit.name, size=unit.size)
             }</p>
         }
     }).collect()
@@ -54,8 +53,8 @@ struct UnitsDetailsProps {
 fn unit_details(UnitsDetailsProps { unit }: &UnitsDetailsProps) -> Html {
     html! {
         <div>
-            <h3>{ unit.name.clone() }</h3>
-            <img src="https://via.placeholder.com/640x360.png?text=Video+Player+Placeholder" alt="video thumbnail" />
+            <h3>{ format!("{name} [{size}]: Q{q} D{d}", name=unit.name,
+                          size=unit.size, q=unit.quality, d=unit.defense) }</h3>
         </div>
     }
 }
@@ -98,9 +97,9 @@ fn app() -> Html {
 
     html! {
         <>
-            <h1>{ "RustConf Explorer" }</h1>
+            <h1>{ "Army list" }</h1>
             <div>
-                <h3>{"Units to watch"}</h3>
+                <h3>{"Units"}</h3>
                 <UnitsList units={(*units).clone()} on_click={on_unit_select.clone()} />
             </div>
             { for details }
