@@ -1,13 +1,17 @@
 use yew::prelude::*;
 
+mod static_data;
+
+use crate::static_data::JSON_DATA;
 use serde::Deserialize;
 
 #[derive(Clone, PartialEq, Debug, Deserialize)]
-struct Video {
-    id: usize,
-    title: String,
-    speaker: String,
-    url: String,
+struct Video { // Unit, really
+    id: String,
+    name: String,
+    size: usize,
+    quality: usize,
+    defense: usize,
 }
 
 //
@@ -31,7 +35,10 @@ fn videos_list(VideosListProps { videos, on_click }: &VideosListProps) -> Html {
         };
 
         html! {
-            <p key={video.id} onclick={on_video_select}>{format!("{}: {}", video.speaker, video.title)}</p>
+            <p key={video.id.clone()} onclick={on_video_select}>{
+                format!("{name} [{size}]: Q{q} D{d}", name=video.name,
+                        size=video.size, q=video.quality, d=video.defense)
+            }</p>
         }
     }).collect()
 }
@@ -47,41 +54,13 @@ struct VideosDetailsProps {
 fn video_details(VideosDetailsProps { video }: &VideosDetailsProps) -> Html {
     html! {
         <div>
-            <h3>{ video.title.clone() }</h3>
+            <h3>{ video.name.clone() }</h3>
             <img src="https://via.placeholder.com/640x360.png?text=Video+Player+Placeholder" alt="video thumbnail" />
         </div>
     }
 }
 
 //
-
-const JSON_DATA: &str = r#"[
-    {
-        "id": 1,
-        "title": "Building and breaking things",
-        "speaker": "John Doe",
-        "url": "https://youtu.be/PsaFVLr8t4E"
-    },
-    {
-        "id": 2,
-        "title": "The development process",
-        "speaker": "Jane Smith",
-        "url": "https://youtu.be/PsaFVLr8t4E"
-    },
-    {
-        "id": 3,
-        "title": "The Web 7.0",
-        "speaker": "Matt Miller",
-        "url": "https://youtu.be/PsaFVLr8t4E"
-    },
-    {
-        "id": 4,
-        "title": "Mouseless development",
-        "speaker": "Tom Jerry",
-        "url": "https://youtu.be/PsaFVLr8t4E"
-    }
-]
-"#;
 
 #[function_component(App)]
 fn app() -> Html {
