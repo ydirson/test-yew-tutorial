@@ -38,11 +38,11 @@ struct Unit {
 fn army_list(army: &Army, on_click: &Callback<Unit>) -> Html {
     html! {
         <>
-            <h2>{army.game_system.to_uppercase()}{" - "}{army.name.clone()}</h2>
-            <div>
-                <h3>{"Units"}</h3>
+            <ybc::Title size={ybc::HeaderSize::Is2}>{army.game_system.to_uppercase()}{" - "}{army.name.clone()}</ybc::Title>
+            <ybc::Tile vertical={true}>
+                <ybc::Title size={ybc::HeaderSize::Is3}>{"Units"}</ybc::Title>
                 <UnitsList units={army.units.clone()} on_click={on_click.clone()} />
-            </div>
+            </ybc::Tile>
         </>
     }
 }
@@ -63,9 +63,11 @@ fn units_list(units: &Vec<Unit>, on_click: &Callback<Unit>) -> Html {
         };
 
         html! {
+            <ybc::Tile>
             <p onclick={on_unit_select}>{
                 format!("{name} [{size}]", name=unit.name, size=unit.size)
             }</p>
+            </ybc::Tile>
         }
     }).collect()
 }
@@ -77,8 +79,10 @@ fn units_list(units: &Vec<Unit>, on_click: &Callback<Unit>) -> Html {
 fn unit_details(unit: &Unit) -> Html {
     html! {
         <div>
-            <h3>{ format!("{name} [{size}]: Q{q} D{d}", name=unit.name,
-                          size=unit.size, q=unit.quality, d=unit.defense) }</h3>
+            <ybc::Title size={ybc::HeaderSize::Is3}>{
+                format!("{name} [{size}]: Q{q} D{d}", name=unit.name,
+                        size=unit.size, q=unit.quality, d=unit.defense) }
+            </ybc::Title>
         </div>
     }
 }
@@ -128,15 +132,28 @@ fn app() -> Html {
     //
 
     html! {
-        <>
-            <h1>{APP_NAME}</h1>
-            if !army.is_none() {
-                <>
+    <>
+        <ybc::Navbar
+            classes={classes!("is-success")}
+            padded=true
+            navbrand={html!{
+                <ybc::NavbarItem>
+                    <ybc::Title classes={classes!("has-text-white")} size={ybc::HeaderSize::Is4}>{APP_NAME}</ybc::Title>
+                </ybc::NavbarItem>
+            }}
+            navstart={html!{}}
+            navend={html!{}}
+        />
+        if !army.is_none() {
+            <>
+
+                <ybc::Container fluid=true>
                     <ArmyList army={(*army).clone().unwrap()} on_click={on_unit_select.clone()} />
                     { for details }
-                </>
-            }
-        </>
+                </ybc::Container>
+            </>
+        }
+    </>
     }
 }
 

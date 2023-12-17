@@ -97,6 +97,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "derive_more"
+version = "0.99.17"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4fb810d30a7c1953f91334de7244731fc3f3c10d7fe163338a35b9f640960321"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 1.0.109",
+]
+
+[[package]]
 name = "fnv"
 version = "1.0.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -210,7 +221,7 @@ dependencies = [
  "gloo-storage",
  "gloo-timers",
  "gloo-utils 0.1.7",
- "gloo-worker",
+ "gloo-worker 0.2.1",
 ]
 
 [[package]]
@@ -252,6 +263,7 @@ version = "0.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a8d5564e570a38b43d78bdc063374a0c3098c4f0d64005b12f9bbe87e869b6d7"
 dependencies = [
+ "futures-channel",
  "gloo-events",
  "js-sys",
  "wasm-bindgen",
@@ -347,6 +359,8 @@ version = "0.2.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9b995a66bb87bebce9a0f4a95aed01daca4872c050bfcb21653361c03bc35e5c"
 dependencies = [
+ "futures-channel",
+ "futures-core",
  "js-sys",
  "wasm-bindgen",
 ]
@@ -373,6 +387,23 @@ dependencies = [
  "js-sys",
  "serde",
  "serde_json",
+ "wasm-bindgen",
+ "web-sys",
+]
+
+[[package]]
+name = "gloo-worker"
+version = "0.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "09110b5555bcafe508cee0fb94308af9aac7a85f980d3c88b270d117c6c6911d"
+dependencies = [
+ "anymap2",
+ "bincode",
+ "gloo-console",
+ "gloo-utils 0.1.7",
+ "js-sys",
+ "serde",
+ "slab",
  "wasm-bindgen",
  "web-sys",
 ]
@@ -620,6 +651,12 @@ checksum = "5267fca4496028628a95160fc423a33e8b2e6af8a5302579e322e4b520293cae"
 dependencies = [
  "proc-macro2",
 ]
+
+[[package]]
+name = "route-recognizer"
+version = "0.3.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "afab94fb28594581f62d981211a9a4d53cc8130bbcbbb89a0440d9b8e81a7746"
 
 [[package]]
 name = "rustc-demangle"
@@ -896,6 +933,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "ybc"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6f008cb376153d93ec97e256e6345bc81969c6210d7ddff515d340197952c221"
+dependencies = [
+ "derive_more",
+ "serde",
+ "wasm-bindgen",
+ "web-sys",
+ "yew",
+ "yew-agent",
+ "yew-router",
+]
+
+[[package]]
 name = "yew"
 version = "0.20.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -918,6 +970,16 @@ dependencies = [
  "wasm-bindgen-futures",
  "web-sys",
  "yew-macro",
+]
+
+[[package]]
+name = "yew-agent"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b06f7c5ed97fff22816bb00d3d82ebc0fc1119d7bbb9e07e62c0d2853f51920a"
+dependencies = [
+ "gloo-worker 0.1.2",
+ "yew",
 ]
 
 [[package]]
@@ -947,6 +1009,35 @@ dependencies = [
 ]
 
 [[package]]
+name = "yew-router"
+version = "0.17.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "426ee0486d2572a6c5e39fbdbc48b58d59bb555f3326f54631025266cf04146e"
+dependencies = [
+ "gloo",
+ "js-sys",
+ "route-recognizer",
+ "serde",
+ "serde_urlencoded",
+ "tracing",
+ "wasm-bindgen",
+ "web-sys",
+ "yew",
+ "yew-router-macro",
+]
+
+[[package]]
+name = "yew-router-macro"
+version = "0.17.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "89b249cdb39e0cddaf0644dedc781854524374664793479fdc01e6a65d6e6ae3"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 1.0.109",
+]
+
+[[package]]
 name = "yew-tuto"
 version = "0.1.0"
 dependencies = [
@@ -957,6 +1048,7 @@ dependencies = [
  "wasm-bindgen-futures",
  "wasm-logger",
  "web-sys",
+ "ybc",
  "yew",
  "yew-autoprops",
 ]
