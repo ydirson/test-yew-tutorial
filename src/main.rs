@@ -6,7 +6,7 @@ use crate::static_data::JSON_DATA;
 use serde::Deserialize;
 
 #[derive(Clone, PartialEq, Debug, Deserialize)]
-struct Video { // Unit, really
+struct Unit {
     id: String,
     name: String,
     size: usize,
@@ -17,27 +17,27 @@ struct Video { // Unit, really
 //
 
 #[derive(Properties, PartialEq)]
-struct VideosListProps {
-    videos: Vec<Video>,
-    on_click: Callback<Video>,
+struct UnitsListProps {
+    units: Vec<Unit>,
+    on_click: Callback<Unit>,
 }
 
-#[function_component(VideosList)]
-fn videos_list(VideosListProps { videos, on_click }: &VideosListProps) -> Html {
+#[function_component(UnitsList)]
+fn units_list(UnitsListProps { units, on_click }: &UnitsListProps) -> Html {
     let on_click = on_click.clone();
-    videos.iter().map(|video| {
-        let on_video_select = {
+    units.iter().map(|unit| {
+        let on_unit_select = {
             let on_click = on_click.clone();
-            let video = video.clone();
+            let unit = unit.clone();
             Callback::from(move |_| {
-                on_click.emit(video.clone())
+                on_click.emit(unit.clone())
             })
         };
 
         html! {
-            <p key={video.id.clone()} onclick={on_video_select}>{
-                format!("{name} [{size}]: Q{q} D{d}", name=video.name,
-                        size=video.size, q=video.quality, d=video.defense)
+            <p key={unit.id.clone()} onclick={on_unit_select}>{
+                format!("{name} [{size}]: Q{q} D{d}", name=unit.name,
+                        size=unit.size, q=unit.quality, d=unit.defense)
             }</p>
         }
     }).collect()
@@ -46,15 +46,15 @@ fn videos_list(VideosListProps { videos, on_click }: &VideosListProps) -> Html {
 //
 
 #[derive(Properties, PartialEq)]
-struct VideosDetailsProps {
-    video: Video,
+struct UnitsDetailsProps {
+    unit: Unit,
 }
 
-#[function_component(VideoDetails)]
-fn video_details(VideosDetailsProps { video }: &VideosDetailsProps) -> Html {
+#[function_component(UnitDetails)]
+fn unit_details(UnitsDetailsProps { unit }: &UnitsDetailsProps) -> Html {
     html! {
         <div>
-            <h3>{ video.name.clone() }</h3>
+            <h3>{ unit.name.clone() }</h3>
             <img src="https://via.placeholder.com/640x360.png?text=Video+Player+Placeholder" alt="video thumbnail" />
         </div>
     }
@@ -65,15 +65,15 @@ fn video_details(VideosDetailsProps { video }: &VideosDetailsProps) -> Html {
 #[function_component(App)]
 fn app() -> Html {
 
-    let videos = use_state(|| vec![]);
+    let units = use_state(|| vec![]);
     {
-        let videos = videos.clone();
+        let units = units.clone();
         use_effect_with((), move |_| {
-            let videos = videos.clone();
+            let units = units.clone();
             wasm_bindgen_futures::spawn_local(async move {
-                let fetched_videos: Vec<Video> = serde_json::from_str(JSON_DATA)
+                let fetched_units: Vec<Unit> = serde_json::from_str(JSON_DATA)
                     .unwrap();
-                videos.set(fetched_videos);
+                units.set(fetched_units);
             });
             || ()
         });
@@ -81,17 +81,17 @@ fn app() -> Html {
 
     //
 
-    let selected_video = use_state(|| None);
+    let selected_unit = use_state(|| None);
 
-    let on_video_select = {
-        let selected_video = selected_video.clone();
-        Callback::from(move |video: Video| {
-            selected_video.set(Some(video))
+    let on_unit_select = {
+        let selected_unit = selected_unit.clone();
+        Callback::from(move |unit: Unit| {
+            selected_unit.set(Some(unit))
         })
     };
 
-    let details = selected_video.as_ref().map(|video| html! {
-        <VideoDetails video={video.clone()} />
+    let details = selected_unit.as_ref().map(|unit| html! {
+        <UnitDetails unit={unit.clone()} />
     });
 
     //
@@ -100,8 +100,8 @@ fn app() -> Html {
         <>
             <h1>{ "RustConf Explorer" }</h1>
             <div>
-                <h3>{"Videos to watch"}</h3>
-                <VideosList videos={(*videos).clone()} on_click={on_video_select.clone()} />
+                <h3>{"Units to watch"}</h3>
+                <UnitsList units={(*units).clone()} on_click={on_unit_select.clone()} />
             </div>
             { for details }
         </>
