@@ -132,12 +132,18 @@ fn app() -> Html {
 
     html! {
         <>
-            <h1>{APP_NAME}</h1>
+            <my::MatTopAppBarFixed>
+                <my::top_app_bar_fixed::MatTopAppBarNavigationIcon>
+                    <my::MatIconButton icon="menu"></my::MatIconButton>
+                </my::top_app_bar_fixed::MatTopAppBarNavigationIcon>
+                <my::top_app_bar_fixed::MatTopAppBarTitle>
+                    <h1>{APP_NAME}</h1>
+                </my::top_app_bar_fixed::MatTopAppBarTitle>
+                //<my::MatButton label={"boo"}/>
+            </my::MatTopAppBarFixed>
             if !army.is_none() {
-                <>
                     <ArmyList army={(*army).clone().unwrap()} on_click={on_unit_select.clone()} />
                     { for details }
-                </>
             }
         </>
     }
