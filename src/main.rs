@@ -2,6 +2,7 @@ use yew::prelude::*;
 
 use gloo_net::http::Request;
 use serde::Deserialize;
+use yew_autoprops::autoprops;
 
 const GET_ARMY_BASE_URL: &str = "https://army-forge.onepagerules.com/api/tts";
 
@@ -30,14 +31,9 @@ struct Unit {
 
 //
 
-#[derive(Properties, PartialEq)]
-struct ArmyListProps {
-    army: Army,
-    on_click: Callback<Unit>,
-}
-
+#[autoprops]
 #[function_component(ArmyList)]
-fn army_list(ArmyListProps { army, on_click }: &ArmyListProps) -> Html {
+fn army_list(army: &Army, on_click: &Callback<Unit>) -> Html {
     html! {
         <>
             <h2>{army.game_system.to_uppercase()}{" - "}{army.name.clone()}</h2>
@@ -51,14 +47,9 @@ fn army_list(ArmyListProps { army, on_click }: &ArmyListProps) -> Html {
 
 //
 
-#[derive(Properties, PartialEq)]
-struct UnitsListProps {
-    units: Vec<Unit>,
-    on_click: Callback<Unit>,
-}
-
+#[autoprops]
 #[function_component(UnitsList)]
-fn units_list(UnitsListProps { units, on_click }: &UnitsListProps) -> Html {
+fn units_list(units: &Vec<Unit>, on_click: &Callback<Unit>) -> Html {
     let on_click = on_click.clone();
     units.iter().map(|unit| {
         let on_unit_select = {
@@ -79,13 +70,9 @@ fn units_list(UnitsListProps { units, on_click }: &UnitsListProps) -> Html {
 
 //
 
-#[derive(Properties, PartialEq)]
-struct UnitsDetailsProps {
-    unit: Unit,
-}
-
+#[autoprops]
 #[function_component(UnitDetails)]
-fn unit_details(UnitsDetailsProps { unit }: &UnitsDetailsProps) -> Html {
+fn unit_details(unit: &Unit) -> Html {
     html! {
         <div>
             <h3>{ format!("{name} [{size}]: Q{q} D{d}", name=unit.name,
