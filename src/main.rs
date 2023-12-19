@@ -108,7 +108,11 @@ fn app() -> Html {
     let on_video_select = {
         let selected_video = selected_video.clone();
         Callback::from(move |video: Rc<Video>| {
-            selected_video.set(Some(Rc::clone(&video)))
+            match (*selected_video).clone() {
+                Some(prev_video) if Rc::<Video>::ptr_eq(&prev_video, &video)
+                    => selected_video.set(None),
+                _ => selected_video.set(Some(Rc::clone(&video))),
+            }
         })
     };
 
