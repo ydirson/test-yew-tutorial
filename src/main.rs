@@ -25,9 +25,9 @@ fn videos_list(VideosListProps { videos, on_click }: &VideosListProps) -> Html {
     videos.iter().map(|video| {
         let on_video_select = {
             let on_click = on_click.clone();
-            let video = video.clone();
+            let video = Rc::clone(&video);
             Callback::from(move |_| {
-                on_click.emit(video.clone())
+                on_click.emit(Rc::clone(&video))
             })
         };
 
@@ -108,12 +108,12 @@ fn app() -> Html {
     let on_video_select = {
         let selected_video = selected_video.clone();
         Callback::from(move |video: Rc<Video>| {
-            selected_video.set(Some(video))
+            selected_video.set(Some(Rc::clone(&video)))
         })
     };
 
     let details = selected_video.as_ref().map(|video| html! {
-        <VideoDetails video={video.clone()} />
+        <VideoDetails video={Rc::clone(&video)} />
     });
 
     //
