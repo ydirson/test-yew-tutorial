@@ -108,10 +108,25 @@ fn app() -> Html {
     let on_video_select = {
         let selected_video = selected_video.clone();
         Callback::from(move |video: Rc<Video>| {
+            log::info!("choice: {:p}", &*video);
             match (*selected_video).clone() {
-                Some(prev_video) if Rc::<Video>::ptr_eq(&prev_video, &video)
-                    => selected_video.set(None),
-                _ => selected_video.set(Some(Rc::clone(&video))),
+                None => {
+                    log::info!("None -> {:p}", &*video);
+                    selected_video.set(Some(Rc::clone(&video)))
+                },
+                Some(prev_video) => {
+                    log::info!("prev: {:p}", &*prev_video);
+                    if Rc::<Video>::ptr_eq(&prev_video, &video) {
+                        log::info!("{:p} EQ {:p} -> None", &*prev_video, &*video);
+                        selected_video.set(None);
+                    } else {
+                        log::info!("{:p} NEQ -> {:p}", &*prev_video, &*video);
+                        selected_video.set(Some(Rc::clone(&video)));
+                        //let new_video = (*selected_video).clone().unwrap();
+                        //assert!(! Rc::<Video>::ptr_eq(&new_video, &prev_video));
+                        //assert!(Rc::<Video>::ptr_eq(&new_video, &video));
+                    }
+                },
             }
         })
     };
