@@ -1,8 +1,9 @@
 use yew::prelude::*;
+use std::rc::Rc;
 
 use serde::Deserialize;
 
-#[derive(Clone, PartialEq, Debug, Deserialize)]
+#[derive(PartialEq, Debug, Deserialize)]
 struct Video {
     id: usize,
     title: String,
@@ -14,8 +15,8 @@ struct Video {
 
 #[derive(Properties, PartialEq)]
 struct VideosListProps {
-    videos: Vec<Video>,
-    on_click: Callback<Video>,
+    videos: Vec<Rc<Video>>,
+    on_click: Callback<Rc<Video>>,
 }
 
 #[function_component(VideosList)]
@@ -40,7 +41,7 @@ fn videos_list(VideosListProps { videos, on_click }: &VideosListProps) -> Html {
 
 #[derive(Properties, PartialEq)]
 struct VideosDetailsProps {
-    video: Video,
+    video: Rc<Video>,
 }
 
 #[function_component(VideoDetails)]
@@ -92,7 +93,7 @@ fn app() -> Html {
         use_effect_with((), move |_| {
             let videos = videos.clone();
             wasm_bindgen_futures::spawn_local(async move {
-                let fetched_videos: Vec<Video> = serde_json::from_str(JSON_DATA)
+                let fetched_videos: Vec<Rc<Video>> = serde_json::from_str(JSON_DATA)
                     .unwrap();
                 videos.set(fetched_videos);
             });
@@ -106,7 +107,7 @@ fn app() -> Html {
 
     let on_video_select = {
         let selected_video = selected_video.clone();
-        Callback::from(move |video: Video| {
+        Callback::from(move |video: Rc<Video>| {
             selected_video.set(Some(video))
         })
     };
