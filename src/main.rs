@@ -29,6 +29,37 @@ struct Unit {
     size: usize,
     quality: usize,
     defense: usize,
+    equipment: Vec<Equipment>,
+}
+
+#[derive(Clone, PartialEq, Debug, Deserialize)]
+struct Equipment {
+    id: String,
+    name: String,
+    range: usize,
+    attacks: usize,
+    count: usize,
+}
+
+//
+
+#[autoprops]
+#[function_component(EquipmentList)]
+fn equipment_list(equipment: &Vec<Equipment>) -> Html {
+    equipment.iter().map(|equipment| {
+        html! {
+            <p>
+                if equipment.count != 1 {
+                    {format!("{}x ", equipment.count)}
+                }
+                {format!("{}: ", equipment.name)}
+                if equipment.range != 0 {
+                    {format!(r#" {}", "#, equipment.range )}
+                }
+                {format!("A{}", equipment.attacks)}
+            </p>
+        }
+    }).collect()
 }
 
 //
@@ -83,6 +114,9 @@ fn unit_details(unit: &Unit) -> Html {
                 format!("{name} [{size}]: Q{q} D{d}", name=unit.name,
                         size=unit.size, q=unit.quality, d=unit.defense) }
             </ybc::Title>
+            <ybc::Tile vertical={true}>
+                <EquipmentList equipment={unit.equipment.clone()} />
+            </ybc::Tile>
         </div>
     }
 }
