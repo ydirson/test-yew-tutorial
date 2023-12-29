@@ -10,8 +10,7 @@ const APP_NAME: &str = "General's Familiar";
 
 const GET_ARMY_BASE_URL: &str = "https://army-forge.onepagerules.com/api/tts";
 
-const ARMY_IDS: [&str; 1] = ["ybjR2-7kHUNY"];
-//const ARMY_ID: &str = "VV8Zy0GIfOUX";
+const ARMY_IDS: [&str; 2] = ["ybjR2-7kHUNY", "VV8Zy0GIfOUX"];
 
 #[derive(Clone, PartialEq, Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -242,16 +241,18 @@ fn app() -> Html {
 
     //
 
+    let armies = app_state.armies.iter().map(|army| html! {
+        <>
+            <ArmyList army={army.clone()}
+                      on_click={on_unit_select.clone()} />
+        </>
+    });
+
     html! {
         <>
             <h1>{APP_NAME}</h1>
-            if app_state.armies.len() > 0 {
-                <>
-                    <ArmyList army={app_state.armies[0].clone()}
-                              on_click={on_unit_select.clone()} />
-                    { for details }
-                </>
-            }
+            { for armies }
+            { for details }
         </>
     }
 }
