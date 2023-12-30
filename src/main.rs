@@ -20,10 +20,10 @@ struct Army {
     game_system: String,
     points: usize,
     points_limit: usize,
-    units: Vec<Unit>,
+    units: Vec<Rc<Unit>>,
 }
 
-#[derive(Clone, PartialEq, Debug, Deserialize)]
+#[derive(PartialEq, Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct Unit {
     id: String,
@@ -105,7 +105,7 @@ fn equipment_list(equipment: &Vec<Equipment>) -> Html {
 
 #[autoprops]
 #[function_component(ArmyList)]
-fn army_list(army: &Army, on_click: &Callback<Unit>) -> Html {
+fn army_list(army: &Army, on_click: &Callback<Rc<Unit>>) -> Html {
     html! {
         <>
             <h2>{army.game_system.to_uppercase()}{" - "}{army.name.clone()}</h2>
@@ -121,14 +121,14 @@ fn army_list(army: &Army, on_click: &Callback<Unit>) -> Html {
 
 #[autoprops]
 #[function_component(UnitsList)]
-fn units_list(units: &Vec<Unit>, on_click: &Callback<Unit>) -> Html {
+fn units_list(units: &Vec<Rc<Unit>>, on_click: &Callback<Rc<Unit>>) -> Html {
     let on_click = on_click.clone();
     units.iter().map(|unit| {
         let on_unit_select = {
             let on_click = on_click.clone();
-            let unit = unit.clone();
+            let unit = Rc::clone(&unit);
             Callback::from(move |_| {
-                on_click.emit(unit.clone())
+                on_click.emit(Rc::clone(&unit))
             })
         };
 
@@ -144,7 +144,7 @@ fn units_list(units: &Vec<Unit>, on_click: &Callback<Unit>) -> Html {
 
 #[autoprops]
 #[function_component(UnitDetails)]
-fn unit_details(unit: &Unit) -> Html {
+fn unit_details(unit: &Rc<Unit>) -> Html {
     html! {
         <div>
             <h3>{ format!("{name} [{size}]: Q{q} D{d}", name=unit.name,
@@ -161,12 +161,12 @@ fn unit_details(unit: &Unit) -> Html {
 
 enum AppStateAction {
     AddArmy{index: usize, army: Army},
-    SelectUnit{unit: Unit},
+    SelectUnit{unit: Rc<Unit>},
 }
 
 struct AppState {
     armies: Vec<Army>,
-    selected_unit: Option<Unit>,
+    selected_unit: Option<Rc<Unit>>,
 }
 
 impl Default for AppState {
@@ -234,13 +234,13 @@ fn app() -> Html {
 
     let on_unit_select = {
         let app_state = app_state.clone();
-        Callback::from(move |unit: Unit| {
-            app_state.dispatch(AppStateAction::SelectUnit{unit: unit})
+        Callback::from(move |unit: Rc<Unit>| {
+            app_state.dispatch(AppStateAction::SelectUnit{unit: Rc::clone(&unit)})
         })
     };
 
     let details = app_state.selected_unit.as_ref().map(|unit| html! {
-        <UnitDetails unit={unit.clone()} />
+        <UnitDetails unit={Rc::clone(&unit)} />
     });
 
     //
