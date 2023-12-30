@@ -31,18 +31,18 @@ struct Unit {
     size: usize,
     quality: usize,
     defense: usize,
-    special_rules: Vec<SpecialRule>,
-    equipment: Vec<Equipment>,
+    special_rules: Vec<Rc<SpecialRule>>,
+    equipment: Vec<Rc<Equipment>>,
 }
 
-#[derive(Clone, PartialEq, Debug, Deserialize)]
+#[derive(PartialEq, Debug, Deserialize)]
 struct SpecialRule {
     name: String,
     #[serde(default)]
     rating: String,
 }
 
-#[derive(Clone, PartialEq, Debug, Deserialize)]
+#[derive(PartialEq, Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct Equipment {
     id: String,
@@ -51,14 +51,14 @@ struct Equipment {
     #[serde(deserialize_with = "deserialize_number_from_string")]
     attacks: usize,
     count: usize,
-    special_rules: Vec<SpecialRule>,
+    special_rules: Vec<Rc<SpecialRule>>,
 }
 
 //
 
 #[autoprops]
 #[function_component(SpecialRulesList)]
-fn special_rule_list(special_rules: &Vec<SpecialRule>) -> Html {
+fn special_rule_list(special_rules: &Vec<Rc<SpecialRule>>) -> Html {
     special_rules.iter()
         // render each rule
         .map(|special_rule| {
@@ -80,7 +80,7 @@ fn special_rule_list(special_rules: &Vec<SpecialRule>) -> Html {
 
 #[autoprops]
 #[function_component(EquipmentList)]
-fn equipment_list(equipment: &Vec<Equipment>) -> Html {
+fn equipment_list(equipment: &Vec<Rc<Equipment>>) -> Html {
     equipment.iter().map(|equipment| {
         html! {
             <p>
