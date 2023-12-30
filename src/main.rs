@@ -105,7 +105,7 @@ fn equipment_list(equipment: &Vec<Equipment>) -> Html {
 
 #[autoprops]
 #[function_component(ArmyList)]
-fn army_list(army: &Army, on_click: &Callback<Rc<Unit>>) -> Html {
+fn army_list(army: &Rc<Army>, on_click: &Callback<Rc<Unit>>) -> Html {
     html! {
         <>
             <h2>{army.game_system.to_uppercase()}{" - "}{army.name.clone()}</h2>
@@ -160,12 +160,12 @@ fn unit_details(unit: &Rc<Unit>) -> Html {
 //
 
 enum AppStateAction {
-    AddArmy{index: usize, army: Army},
+    AddArmy{index: usize, army: Rc<Army>},
     SelectUnit{unit: Rc<Unit>},
 }
 
 struct AppState {
-    armies: Vec<Army>,
+    armies: Vec<Rc<Army>>,
     selected_unit: Option<Rc<Unit>>,
 }
 
@@ -185,7 +185,7 @@ impl Reducible for AppState {
             AppStateAction::AddArmy{index, army} => {
                 assert!(index <= armies.len());
                 if index == armies.len() {
-                    armies.resize_with(index + 1, || army.clone());
+                    armies.resize_with(index + 1, || Rc::clone(&army));
                 } else {
                     armies[index] = army;
                 }
@@ -213,9 +213,10 @@ fn app() -> Html {
                 |(i, army_id)| {
                     let app_state = app_state.clone();
                     wasm_bindgen_futures::spawn_local(async move {
-                        let fetched_army: Army = Request::get(format!("{base_url}?id={id}",
-                                                                      base_url=GET_ARMY_BASE_URL,
-                                                                      id=army_id).as_str())
+                        let fetched_army: Rc<Army> =
+                            Request::get(format!("{base_url}?id={id}",
+                                                 base_url=GET_ARMY_BASE_URL,
+                                                 id=army_id).as_str())
                             .send()
                             .await
                             .expect("should get an HTTP answer")
@@ -247,7 +248,7 @@ fn app() -> Html {
 
     let armies = app_state.armies.iter().map(|army| html! {
         <div style="flex-grow: 1">
-            <ArmyList army={army.clone()}
+            <ArmyList army={Rc::clone(&army)}
                       on_click={on_unit_select.clone()} />
         </div>
     });
