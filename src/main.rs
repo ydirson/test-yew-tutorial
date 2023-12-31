@@ -3,13 +3,14 @@ use yew::prelude::*;
 use gloo_net::http::Request;
 use serde::Deserialize;
 use serde_aux::field_attributes::deserialize_number_from_string;
+use std::rc::Rc;
 use yew_autoprops::autoprops;
 
 const APP_NAME: &str = "General's Familiar";
 
 const GET_ARMY_BASE_URL: &str = "https://army-forge.onepagerules.com/api/tts";
 
-const ARMY_ID: &str = "ybjR2-7kHUNY";
+const ARMY_IDS: [&str; 1] = ["ybjR2-7kHUNY"];
 //const ARMY_ID: &str = "VV8Zy0GIfOUX";
 
 #[derive(Clone, PartialEq, Debug, Deserialize)]
@@ -163,26 +164,66 @@ fn unit_details(unit: &Unit) -> Html {
 
 //
 
+enum AppStateAction {
+    AddArmy{index: usize, army: Army},
+}
+
+struct AppState {
+    armies: Vec<Army>,
+}
+
+impl Default for AppState {
+    fn default() -> Self {
+        Self { armies: vec!() }
+    }
+}
+
+impl Reducible for AppState {
+    type Action = AppStateAction;
+
+    fn reduce(self: Rc<Self>, action: Self::Action) -> Rc<Self> {
+        let mut armies = self.armies.clone();
+        match action {
+            AppStateAction::AddArmy{index, army} => {
+                assert!(index <= armies.len());
+                if index == armies.len() {
+                    armies.resize_with(index + 1, || army.clone());
+                } else {
+                    armies[index] = army;
+                }
+            },
+        }
+
+        Self { armies }.into()
+    }
+}
+
+//
+
 #[function_component(App)]
 fn app() -> Html {
 
-    let army = use_state(|| None);
+    let app_state = use_reducer(AppState::default);
+
     {
-        let army = army.clone();
+        let app_state = app_state.clone();
         use_effect_with_deps(move |_| {
-            let army = army.clone();
-            wasm_bindgen_futures::spawn_local(async move {
-                let fetched_army: Army = Request::get(format!("{base_url}?id={id}",
-                                                              base_url=GET_ARMY_BASE_URL,
-                                                              id=ARMY_ID).as_str())
-                    .send()
-                    .await
-                    .expect("should get an HTTP answer")
-                    .json()
-                    .await
-                    .expect("should deserialize Army from JSON content");
-                army.set(Some(fetched_army));
-            });
+            let _ = ARMY_IDS.iter().enumerate().map(
+                |(i, army_id)| {
+                    let app_state = app_state.clone();
+                    wasm_bindgen_futures::spawn_local(async move {
+                        let fetched_army: Army = Request::get(format!("{base_url}?id={id}",
+                                                                      base_url=GET_ARMY_BASE_URL,
+                                                                      id=army_id).as_str())
+                            .send()
+                            .await
+                            .expect("should get an HTTP answer")
+                            .json()
+                            .await
+                            .expect("should deserialize Army from JSON content");
+                        app_state.dispatch(AppStateAction::AddArmy{index:i, army:fetched_army});
+                    });
+                }).collect::<()>();
             || ()
         },
         ());
@@ -218,11 +259,11 @@ fn app() -> Html {
             navstart={html!{}}
             navend={html!{}}
         />
-        if !army.is_none() {
+        if app_state.armies.len() > 0 {
             <>
-
                 <ybc::Container fluid=true>
-                    <ArmyList army={(*army).clone().unwrap()} on_click={on_unit_select.clone()} />
+                    <ArmyList army={app_state.armies[0].clone()}
+                              on_click={on_unit_select.clone()} />
                     { for details }
                 </ybc::Container>
             </>
