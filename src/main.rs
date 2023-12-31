@@ -175,10 +175,10 @@ fn app() -> Html {
                                                               id=ARMY_ID).as_str())
                     .send()
                     .await
-                    .unwrap()
+                    .expect("should get an HTTP answer")
                     .json()
                     .await
-                    .unwrap();
+                    .expect("should deserialize Army from JSON content");
                 army.set(Some(fetched_army));
             });
             || ()
