@@ -20,10 +20,10 @@ struct Army {
     game_system: String,
     points: usize,
     points_limit: usize,
-    units: Vec<Unit>,
+    units: Vec<Rc<Unit>>,
 }
 
-#[derive(Clone, PartialEq, Debug, Deserialize)]
+#[derive(PartialEq, Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct Unit {
     id: String,
@@ -31,18 +31,18 @@ struct Unit {
     size: usize,
     quality: usize,
     defense: usize,
-    special_rules: Vec<SpecialRule>,
-    equipment: Vec<Equipment>,
+    special_rules: Vec<Rc<SpecialRule>>,
+    equipment: Vec<Rc<Equipment>>,
 }
 
-#[derive(Clone, PartialEq, Debug, Deserialize)]
+#[derive(PartialEq, Debug, Deserialize)]
 struct SpecialRule {
     name: String,
     #[serde(default)]
     rating: String,
 }
 
-#[derive(Clone, PartialEq, Debug, Deserialize)]
+#[derive(PartialEq, Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct Equipment {
     id: String,
@@ -51,14 +51,14 @@ struct Equipment {
     #[serde(deserialize_with = "deserialize_number_from_string")]
     attacks: usize,
     count: usize,
-    special_rules: Vec<SpecialRule>,
+    special_rules: Vec<Rc<SpecialRule>>,
 }
 
 //
 
 #[autoprops]
 #[function_component(SpecialRulesList)]
-fn special_rule_list(special_rules: &Vec<SpecialRule>) -> Html {
+fn special_rule_list(special_rules: &Vec<Rc<SpecialRule>>) -> Html {
     special_rules.iter()
         // render each rule
         .map(|special_rule| {
@@ -80,7 +80,7 @@ fn special_rule_list(special_rules: &Vec<SpecialRule>) -> Html {
 
 #[autoprops]
 #[function_component(EquipmentList)]
-fn equipment_list(equipment: &Vec<Equipment>) -> Html {
+fn equipment_list(equipment: &Vec<Rc<Equipment>>) -> Html {
     equipment.iter().map(|equipment| {
         html! {
             <p>
@@ -105,7 +105,7 @@ fn equipment_list(equipment: &Vec<Equipment>) -> Html {
 
 #[autoprops]
 #[function_component(ArmyList)]
-fn army_list(army: &Army, on_click: &Callback<Unit>) -> Html {
+fn army_list(army: &Rc<Army>, on_click: &Callback<Rc<Unit>>) -> Html {
     html! {
         <>
             <ybc::Title size={ybc::HeaderSize::Is2}>{army.game_system.to_uppercase()}{" - "}{army.name.clone()}</ybc::Title>
@@ -121,14 +121,14 @@ fn army_list(army: &Army, on_click: &Callback<Unit>) -> Html {
 
 #[autoprops]
 #[function_component(UnitsList)]
-fn units_list(units: &Vec<Unit>, on_click: &Callback<Unit>) -> Html {
+fn units_list(units: &Vec<Rc<Unit>>, on_click: &Callback<Rc<Unit>>) -> Html {
     let on_click = on_click.clone();
     units.iter().map(|unit| {
         let on_unit_select = {
             let on_click = on_click.clone();
-            let unit = unit.clone();
+            let unit = Rc::clone(&unit);
             Callback::from(move |_| {
-                on_click.emit(unit.clone())
+                on_click.emit(Rc::clone(&unit))
             })
         };
 
@@ -146,7 +146,7 @@ fn units_list(units: &Vec<Unit>, on_click: &Callback<Unit>) -> Html {
 
 #[autoprops]
 #[function_component(UnitDetails)]
-fn unit_details(unit: &Unit) -> Html {
+fn unit_details(unit: &Rc<Unit>) -> Html {
     html! {
         <div>
             <ybc::Title size={ybc::HeaderSize::Is3}>{
@@ -164,13 +164,13 @@ fn unit_details(unit: &Unit) -> Html {
 //
 
 enum AppStateAction {
-    AddArmy{index: usize, army: Army},
-    SelectUnit{unit: Unit},
+    AddArmy{index: usize, army: Rc<Army>},
+    SelectUnit{unit: Rc<Unit>},
 }
 
 struct AppState {
-    armies: Vec<Army>,
-    selected_unit: Option<Unit>,
+    armies: Vec<Rc<Army>>,
+    selected_unit: Option<Rc<Unit>>,
 }
 
 impl Default for AppState {
@@ -189,7 +189,7 @@ impl Reducible for AppState {
             AppStateAction::AddArmy{index, army} => {
                 assert!(index <= armies.len());
                 if index == armies.len() {
-                    armies.resize_with(index + 1, || army.clone());
+                    armies.resize_with(index + 1, || Rc::clone(&army));
                 } else {
                     armies[index] = army;
                 }
@@ -217,9 +217,10 @@ fn app() -> Html {
                 |(i, army_id)| {
                     let app_state = app_state.clone();
                     wasm_bindgen_futures::spawn_local(async move {
-                        let fetched_army: Army = Request::get(format!("{base_url}?id={id}",
-                                                                      base_url=GET_ARMY_BASE_URL,
-                                                                      id=army_id).as_str())
+                        let fetched_army: Rc<Army> =
+                            Request::get(format!("{base_url}?id={id}",
+                                                 base_url=GET_ARMY_BASE_URL,
+                                                 id=army_id).as_str())
                             .send()
                             .await
                             .expect("should get an HTTP answer")
@@ -238,20 +239,20 @@ fn app() -> Html {
 
     let on_unit_select = {
         let app_state = app_state.clone();
-        Callback::from(move |unit: Unit| {
-            app_state.dispatch(AppStateAction::SelectUnit{unit: unit})
+        Callback::from(move |unit: Rc<Unit>| {
+            app_state.dispatch(AppStateAction::SelectUnit{unit: Rc::clone(&unit)})
         })
     };
 
     let details = app_state.selected_unit.as_ref().map(|unit| html! {
-        <UnitDetails unit={unit.clone()} />
+        <UnitDetails unit={Rc::clone(&unit)} />
     });
 
     //
 
     let armies = app_state.armies.iter().map(|army| html! {
         <div style="flex-grow: 1">
-            <ArmyList army={army.clone()}
+            <ArmyList army={Rc::clone(&army)}
                       on_click={on_unit_select.clone()} />
         </div>
     });
