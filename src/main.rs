@@ -2,6 +2,7 @@ use yew::prelude::*;
 
 use gloo_net::http::Request;
 use serde::Deserialize;
+use serde_aux::field_attributes::deserialize_number_from_string;
 use yew_autoprops::autoprops;
 
 const APP_NAME: &str = "General's Familiar";
@@ -47,6 +48,7 @@ struct Equipment {
     id: String,
     name: String,
     range: usize,
+    #[serde(deserialize_with = "deserialize_number_from_string")]
     attacks: usize,
     count: usize,
     special_rules: Vec<SpecialRule>,
