@@ -246,16 +246,18 @@ fn app() -> Html {
     //
 
     let armies = app_state.armies.iter().map(|army| html! {
-        <>
+        <div style="flex-grow: 1">
             <ArmyList army={army.clone()}
                       on_click={on_unit_select.clone()} />
-        </>
+        </div>
     });
 
     html! {
         <>
             <h1>{APP_NAME}</h1>
-            { for armies }
+            <div style="display: flex">
+                { for armies }
+            </div>
             { for details }
         </>
     }
