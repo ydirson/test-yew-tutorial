@@ -61,7 +61,7 @@ fn units_list(units: &Vec<Unit>, on_click: &Callback<Unit>) -> Html {
         };
 
         html! {
-            <p key={unit.id.clone()} onclick={on_unit_select}>{
+            <p onclick={on_unit_select}>{
                 format!("{name} [{size}]", name=unit.name, size=unit.size)
             }</p>
         }
