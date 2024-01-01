@@ -4,6 +4,7 @@ use gloo_net::http::Request;
 use material_yew as my;
 use serde::Deserialize;
 use serde_aux::field_attributes::deserialize_number_from_string;
+use std::iter::zip;
 use std::rc::Rc;
 use yew_autoprops::autoprops;
 
@@ -169,12 +170,12 @@ enum AppStateAction {
 
 struct AppState {
     armies: Vec<Rc<Army>>,
-    selected_unit: Option<Rc<Unit>>,
+    selected_units: Vec<Option<Rc<Unit>>>,
 }
 
 impl Default for AppState {
     fn default() -> Self {
-        Self { armies: vec!(), selected_unit: None }
+        Self { armies: vec!(), selected_units: vec!() }
     }
 }
 
@@ -183,22 +184,35 @@ impl Reducible for AppState {
 
     fn reduce(self: Rc<Self>, action: Self::Action) -> Rc<Self> {
         let mut armies = self.armies.clone();
-        let mut selected_unit = self.selected_unit.clone();
+        let mut selected_units = self.selected_units.clone();
         match action {
             AppStateAction::AddArmy{index, army} => {
                 assert!(index <= armies.len());
                 if index == armies.len() {
                     armies.resize_with(index + 1, || Rc::clone(&army));
+                    selected_units.resize_with(index + 1, || None);
                 } else {
                     armies[index] = army;
+                    selected_units[index] = None;
                 }
             },
             AppStateAction::SelectUnit{unit} => {
-                selected_unit = Some(unit);
+                if let Some(index) = 'army_index: {
+                    for (index, army) in self.armies.iter().enumerate() {
+                        if army.units.iter().any(|e| Rc::<Unit>::ptr_eq(&e, &unit)) {
+                            break 'army_index Some(index);
+                        }
+                    }
+                    None
+                } {
+                    selected_units[index] = Some(unit);
+                } else {
+                    log::warn!("selecting unknown unit");
+                }
             },
         }
 
-        Self { armies, selected_unit }.into()
+        Self { armies, selected_units }.into()
     }
 }
 
@@ -243,18 +257,23 @@ fn app() -> Html {
         })
     };
 
-    let details = app_state.selected_unit.as_ref().map(|unit| html! {
-        <UnitDetails unit={Rc::clone(&unit)} />
-    });
-
     //
 
-    let armies = app_state.armies.iter().map(|army| html! {
-        <div style="flex-grow: 1">
-            <ArmyList army={Rc::clone(&army)}
-                      on_click={on_unit_select.clone()} />
-        </div>
-    });
+    let armies = zip(app_state.armies.iter(),
+                     app_state.selected_units.iter())
+        .map(|(army, selected_unit)| {
+            let details = selected_unit.as_ref().map(|unit| html! {
+                <UnitDetails unit={Rc::clone(&unit)} />
+            });
+
+            html! {
+                <div style="flex-grow: 1">
+                    <ArmyList army={Rc::clone(&army)}
+                              on_click={on_unit_select.clone()} />
+                    { for details }
+                </div>
+            }
+        });
 
     html! {
         <>
@@ -270,7 +289,6 @@ fn app() -> Html {
             <div style="display: flex">
                 { for armies }
             </div>
-            { for details }
         </>
     }
 }
