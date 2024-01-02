@@ -24,13 +24,22 @@ struct Army {
 }
 
 #[derive(Clone, PartialEq, Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
 struct Unit {
     id: String,
     name: String,
     size: usize,
     quality: usize,
     defense: usize,
+    special_rules: Vec<SpecialRule>,
     equipment: Vec<Equipment>,
+}
+
+#[derive(Clone, PartialEq, Debug, Deserialize)]
+struct SpecialRule {
+    name: String,
+    #[serde(default)]
+    rating: String,
 }
 
 #[derive(Clone, PartialEq, Debug, Deserialize)]
@@ -40,6 +49,28 @@ struct Equipment {
     range: usize,
     attacks: usize,
     count: usize,
+}
+
+//
+
+#[autoprops]
+#[function_component(SpecialRulesList)]
+fn special_rule_list(special_rules: &Vec<SpecialRule>) -> Html {
+    special_rules.iter()
+        // render each rule
+        .map(|special_rule| {
+            let rating = match special_rule.rating.as_str() {
+                "" => { "".to_string() },
+                rating => { format!("({})", rating) },
+            };
+            html! {{
+                format!("{name}{rating}", name=special_rule.name, rating=rating)
+            }}
+        })
+        // zip with commas and skip the leading one
+        .flat_map(|x| vec![html! { {", "} }, x])
+        .skip(1)
+        .collect()
 }
 
 //
@@ -113,6 +144,7 @@ fn unit_details(unit: &Unit) -> Html {
         <div>
             <h3>{ format!("{name} [{size}]: Q{q} D{d}", name=unit.name,
                           size=unit.size, q=unit.quality, d=unit.defense) }</h3>
+            <SpecialRulesList special_rules={unit.special_rules.clone()} />
             <my::MatList>
                 <EquipmentList equipment={unit.equipment.clone()} />
             </my::MatList>
