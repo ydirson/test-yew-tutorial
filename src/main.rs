@@ -164,15 +164,17 @@ fn unit_details(unit: &Unit) -> Html {
 
 enum AppStateAction {
     AddArmy{index: usize, army: Army},
+    SelectUnit{unit: Unit},
 }
 
 struct AppState {
     armies: Vec<Army>,
+    selected_unit: Option<Unit>,
 }
 
 impl Default for AppState {
     fn default() -> Self {
-        Self { armies: vec!() }
+        Self { armies: vec!(), selected_unit: None }
     }
 }
 
@@ -181,6 +183,7 @@ impl Reducible for AppState {
 
     fn reduce(self: Rc<Self>, action: Self::Action) -> Rc<Self> {
         let mut armies = self.armies.clone();
+        let mut selected_unit = self.selected_unit.clone();
         match action {
             AppStateAction::AddArmy{index, army} => {
                 assert!(index <= armies.len());
@@ -190,9 +193,12 @@ impl Reducible for AppState {
                     armies[index] = army;
                 }
             },
+            AppStateAction::SelectUnit{unit} => {
+                selected_unit = Some(unit);
+            },
         }
 
-        Self { armies }.into()
+        Self { armies, selected_unit }.into()
     }
 }
 
@@ -229,26 +235,24 @@ fn app() -> Html {
 
     //
 
-    let selected_unit = use_state(|| None);
-
     let on_unit_select = {
-        let selected_unit = selected_unit.clone();
+        let app_state = app_state.clone();
         Callback::from(move |unit: Unit| {
-            selected_unit.set(Some(unit))
+            app_state.dispatch(AppStateAction::SelectUnit{unit: unit})
         })
     };
 
-    let details = selected_unit.as_ref().map(|unit| html! {
+    let details = app_state.selected_unit.as_ref().map(|unit| html! {
         <UnitDetails unit={unit.clone()} />
     });
 
     //
 
     let armies = app_state.armies.iter().map(|army| html! {
-        <>
+        <div style="flex-grow: 1">
             <ArmyList army={army.clone()}
                       on_click={on_unit_select.clone()} />
-        </>
+        </div>
     });
 
     html! {
@@ -262,7 +266,9 @@ fn app() -> Html {
                 </my::top_app_bar_fixed::MatTopAppBarTitle>
                 //<my::MatButton label={"boo"}/>
             </my::MatTopAppBarFixed>
-            { for armies }
+            <div style="display: flex">
+                { for armies }
+            </div>
             { for details }
         </>
     }
