@@ -43,12 +43,14 @@ struct SpecialRule {
 }
 
 #[derive(Clone, PartialEq, Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
 struct Equipment {
     id: String,
     name: String,
     range: usize,
     attacks: usize,
     count: usize,
+    special_rules: Vec<SpecialRule>,
 }
 
 //
@@ -89,6 +91,10 @@ fn equipment_list(equipment: &Vec<Equipment>) -> Html {
                     {format!(r#" {}", "#, equipment.range )}
                 }
                 {format!("A{}", equipment.attacks)}
+                if ! equipment.special_rules.is_empty() {
+                    {", "}
+                }
+                <SpecialRulesList special_rules={equipment.special_rules.clone()} />
             </my::MatListItem>
         }
     }).collect()
