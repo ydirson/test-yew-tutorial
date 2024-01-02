@@ -4,6 +4,8 @@ use gloo_net::http::Request;
 use serde::Deserialize;
 use yew_autoprops::autoprops;
 
+const APP_NAME: &str = "General's Familiar";
+
 const GET_ARMY_BASE_URL: &str = "https://army-forge.onepagerules.com/api/tts";
 
 const ARMY_ID: &str = "ybjR2-7kHUNY";
@@ -126,12 +128,15 @@ fn app() -> Html {
     //
 
     html! {
-        if !army.is_none() {
-            <>
-                <ArmyList army={(*army).clone().unwrap()} on_click={on_unit_select.clone()} />
-                { for details }
-            </>
-        }
+        <>
+            <h1>{APP_NAME}</h1>
+            if !army.is_none() {
+                <>
+                    <ArmyList army={(*army).clone().unwrap()} on_click={on_unit_select.clone()} />
+                    { for details }
+                </>
+            }
+        </>
     }
 }
 
