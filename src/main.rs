@@ -49,7 +49,7 @@ struct Equipment {
 fn equipment_list(equipment: &Vec<Equipment>) -> Html {
     equipment.iter().map(|equipment| {
         html! {
-            <p>
+            <my::MatListItem>
                 if equipment.count != 1 {
                     {format!("{}x ", equipment.count)}
                 }
@@ -58,7 +58,7 @@ fn equipment_list(equipment: &Vec<Equipment>) -> Html {
                     {format!(r#" {}", "#, equipment.range )}
                 }
                 {format!("A{}", equipment.attacks)}
-            </p>
+            </my::MatListItem>
         }
     }).collect()
 }
@@ -113,9 +113,9 @@ fn unit_details(unit: &Unit) -> Html {
         <div>
             <h3>{ format!("{name} [{size}]: Q{q} D{d}", name=unit.name,
                           size=unit.size, q=unit.quality, d=unit.defense) }</h3>
-            <ul>
+            <my::MatList>
                 <EquipmentList equipment={unit.equipment.clone()} />
-            </ul>
+            </my::MatList>
         </div>
     }
 }
