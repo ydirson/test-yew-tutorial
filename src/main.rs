@@ -1,6 +1,7 @@
 use yew::prelude::*;
 
 use gloo_net::http::Request;
+use material_yew as my;
 use serde::Deserialize;
 use yew_autoprops::autoprops;
 
@@ -41,7 +42,9 @@ fn army_list(army: &Army, on_click: &Callback<Unit>) -> Html {
             <h2>{army.game_system.to_uppercase()}{" - "}{army.name.clone()}</h2>
             <div>
                 <h3>{"Units"}</h3>
-                <UnitsList units={army.units.clone()} on_click={on_click.clone()} />
+                <my::MatList>
+                    <UnitsList units={army.units.clone()} on_click={on_click.clone()} />
+                </my::MatList>
             </div>
         </>
     }
@@ -63,9 +66,9 @@ fn units_list(units: &Vec<Unit>, on_click: &Callback<Unit>) -> Html {
         };
 
         html! {
-            <p onclick={on_unit_select}>{
+            <my::MatListItem on_request_selected={on_unit_select}>{
                 format!("{name} [{size}]", name=unit.name, size=unit.size)
-            }</p>
+            }</my::MatListItem>
         }
     }).collect()
 }
