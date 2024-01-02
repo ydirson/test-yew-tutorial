@@ -142,5 +142,19 @@ fn app() -> Html {
 
 fn main() {
     wasm_logger::init(wasm_logger::Config::default());
+
+    // document name
+    let doc = web_sys::window()
+        .expect("should have a window")
+        .document()
+        .expect("window should have a document");
+    let title = doc.create_element("title").expect("should create title");
+    title.set_text_content(Some(APP_NAME));
+    doc
+        .head()
+        .expect("document should have a head")
+        .append_child(&title)
+        .expect("should set document title");
+
     yew::Renderer::<App>::new().render();
 }
