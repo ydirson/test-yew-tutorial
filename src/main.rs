@@ -167,6 +167,7 @@ fn unit_details(unit: &Rc<Unit>) -> Html {
 enum AppStateAction {
     AddArmy{index: usize, army: Rc<Army>},
     SelectUnit{unit: Rc<Unit>},
+    DeselectUnit{army_index: usize},
 }
 
 struct AppState {
@@ -211,6 +212,9 @@ impl Reducible for AppState {
                     log::warn!("selecting unknown unit");
                 }
             },
+            AppStateAction::DeselectUnit{army_index} => {
+                selected_units[army_index] = None;
+            },
         }
 
         Self { armies, selected_units }.into()
@@ -254,7 +258,17 @@ fn app() -> Html {
     let on_unit_select = {
         let app_state = app_state.clone();
         Callback::from(move |unit: Rc<Unit>| {
-            app_state.dispatch(AppStateAction::SelectUnit{unit: Rc::clone(&unit)})
+            let selected_item = app_state.selected_units
+                .iter()
+                .enumerate()
+                .find(|(_, e)| match e {None => false,
+                                        Some(e) => Rc::<Unit>::ptr_eq(&e, &unit)});
+            match selected_item {
+                None =>
+                    app_state.dispatch(AppStateAction::SelectUnit{unit: Rc::clone(&unit)}),
+                Some((army_index, _)) =>
+                    app_state.dispatch(AppStateAction::DeselectUnit{army_index}),
+            }
         })
     };
 
