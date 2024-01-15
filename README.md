@@ -31,6 +31,8 @@ issues, get better descriptions, etc.  It is expected to stabilize the
 
 * `opr-material-yew` exhibits erratic behavior of selection callback
 * size of WASM executable is unreasonable
+* race condition handling the result of list loading causes error and
+  no data displayed when 2nd list loads faster than 1t list
 
 ## Functionnality Roadmap
 
