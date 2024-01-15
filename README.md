@@ -25,6 +25,8 @@ tutorial, commits in those branches regularly get rewritten to fix
 issues, get better descriptions, etc.  It is expected to stabilize the
 `master` contents at some point in the not-too-far future.
 
+### [Check the apps in your browser](https://ydirson.github.io/test-yew-tutorial/)
+
 ## Important issues to solve first
 
 * `opr-material-yew` exhibits erratic behavior of selection callback
@@ -32,7 +34,6 @@ issues, get better descriptions, etc.  It is expected to stabilize the
 
 ## Functionnality Roadmap
 
-* setup CI so the results can be experienced with just a web browser
 * get the selected units from each army displayed, with something like
   Drawer components on either sides of the screen
 * ensure important list-level info is displayed, and not hidden by
